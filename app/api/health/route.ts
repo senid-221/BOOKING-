@@ -1,0 +1,2 @@
+import {NextResponse} from "next/server";import {PrismaClient} from "@prisma/client";const prisma=new PrismaClient();
+export async function GET(){try{await prisma.$queryRaw`SELECT 1`;return NextResponse.json({ok:true,database:"connected",service:"BOOKING"})}catch(e){console.error(e);return NextResponse.json({ok:false,database:"unavailable",service:"BOOKING"},{status:503})}}
