@@ -17,12 +17,8 @@ export default function Home() {
         </div>
 
         <div className="welcome-content">
-          <small className="welcome-eyebrow">SERVICE BOOKING PLATFORM</small>
-          <h1>
-            Welcome to
-            <br />
-            <span>BOOKING</span>
-          </h1>
+          
+
           <p>
             Shaka service, hitamo igihe n&apos;aho uyishakira, hanyuma ukomeze
             intambwe ku yindi.
