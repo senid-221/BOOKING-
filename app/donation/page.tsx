@@ -133,6 +133,21 @@ export default function Donation() {
           )}
         </form>
 
+        <aside className="donation-info">
+          <div className="info-icon">
+            <Smartphone size={23} />
+          </div>
+          <h2>MTN MoMo</h2>
+          <p>
+            Hitamo amount, shyiramo nimero ya MTN MoMo, hanyuma wemeze payment
+            kuri telefoni yawe.
+          </p>
+          <div className="secure">
+            <b>Payment status</b>
+            <span>{donationId ? "PENDING" : "Not started"}</span>
+          </div>
+          <small>BOOKING ntizakira kandi ntibika PIN ya MoMo.</small>
+        </aside>
 
       </div>
     </main>
