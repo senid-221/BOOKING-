@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { PrismaClient, ProviderStatus } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 import { cookieName, isValidAdminSession } from "@/lib/admin-auth";
 
 const prisma = new PrismaClient();
@@ -74,7 +74,7 @@ export async function GET() {
     activeProviders: providers.filter(
       (provider) =>
         provider.serviceId === service.id &&
-        provider.status === ProviderStatus.ACTIVE
+        provider.status === "ACTIVE"
     ).length,
     capacity: service.maxProviders,
   }));
