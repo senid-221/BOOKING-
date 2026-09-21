@@ -1,7 +1,123 @@
 "use client";
-import {useEffect,useState} from "react";import Link from "next/link";import {ArrowLeft,Check,Clock3,Mail,Search} from "lucide-react";
-type C={id:string;fullName:string;phone:string;message:string;status:string;createdAt:string};
-export default function Contacts(){const[data,setData]=useState<C[]>([]);const[q,setQ]=useState("");const[filter,setFilter]=useState("ALL");const[msg,setMsg]=useState("");
-async function load(){const r=await fetch("/api/admin/contacts",{cache:"no-store"});if(r.ok)setData(await r.json())}useEffect(()=>{load()},[]);
-async function update(id:string,status:string){setMsg("");const r=await fetch("/api/admin/contacts/"+id,{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({status})});const d=await r.json();if(!r.ok)setMsg(d.error||"Update failed");else setMsg("Contact updated.");load()}
-const list=data.filter(c=>(filter==="ALL"||c.status===filter)&&(c.fullName+" "+c.phone+" "+c.message).toLowerCase().includes(q.toLowerCase()));return <main className="admin-page"><Link href="/dashboard" className="back"><ArrowLeft size={17}/> Dashboard</Link><div className="admin-page-head"><div><small>CONTACT INBOX</small><h1>Customer Messages</h1><p>Manage help and support requests.</p></div><div className="payment-toolbar"><div className="admin-search"><Search size={17}/><input value={q} onChange={e=>setQ(e.target.value)} placeholder="Search message..."/></div><select value={filter} onChange={e=>setFilter(e.target.value)}><option>ALL</option><option>NEW</option><option>IN_PROGRESS</option><option>RESOLVED</option></select></div></div>{msg&&<div className="admin-message">{msg}</div>}<div className="contact-admin-list">{list.map(c=><article className="contact-admin-card panel" key={c.id}><div className="contact-admin-head"><div><b>{c.fullName}</b><small>{c.phone} · {new Date(c.createdAt).toLocaleString()}</small></div><span className={"status "+c.status.toLowerCase()}>{c.status}</span></div><p>{c.message}</p><div className="row-actions">{c.status!=="IN_PROGRESS"&&c.status!=="RESOLVED"&&<button onClick={()=>update(c.id,"IN_PROGRESS")}><Clock3 size={14}/> In progress</button>}{c.status!=="RESOLVED"&&<button onClick={()=>update(c.id,"RESOLVED")}><Check size={14}/> Resolve</button>}</div></article>)}{!list.length&&<div className="empty">No customer messages found.</div>}</div></main>
+
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { ArrowLeft, Check, Clock3, Search } from "lucide-react";
+
+type C = {
+  id: string;
+  fullName: string;
+  phone: string;
+  message: string;
+  status: string;
+  createdAt: string;
+};
+
+export default function Contacts() {
+  const [data, setData] = useState<C[]>([]);
+  const [q, setQ] = useState("");
+  const [filter, setFilter] = useState("ALL");
+  const [msg, setMsg] = useState("");
+
+  async function load() {
+    const r = await fetch("/api/admin/contacts", { cache: "no-store" });
+    if (r.ok) setData(await r.json());
+  }
+
+  useEffect(() => {
+    load();
+  }, []);
+
+  async function update(id: string, status: string) {
+    setMsg("");
+
+    const r = await fetch("/api/admin/contacts/" + id, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status }),
+    });
+
+    const d = await r.json();
+    if (!r.ok) setMsg(d.error || "Update failed.");
+    else setMsg("Contact updated.");
+
+    load();
+  }
+
+  const list = data.filter(
+    (c) =>
+      (filter === "ALL" || c.status === filter) &&
+      (c.fullName + " " + c.phone + " " + c.message)
+        .toLowerCase()
+        .includes(q.toLowerCase())
+  );
+
+  return (
+    <main className="admin-page">
+      <Link href="/dashboard" className="back">
+        <ArrowLeft size={17} /> Dashboard
+      </Link>
+
+      <div className="admin-page-head">
+        <div>
+          <small>CONTACT INBOX</small>
+          <h1>Customer Messages</h1>
+          <p>Manage help and support requests.</p>
+        </div>
+        <div className="payment-toolbar">
+          <div className="admin-search">
+            <Search size={17} />
+            <input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="Search message..."
+            />
+          </div>
+          <select value={filter} onChange={(e) => setFilter(e.target.value)}>
+            <option>ALL</option>
+            <option>NEW</option>
+            <option>IN_PROGRESS</option>
+            <option>RESOLVED</option>
+          </select>
+        </div>
+      </div>
+
+      {msg && <div className="admin-message">{msg}</div>}
+
+      <div className="contact-admin-list">
+        {list.map((c) => (
+          <article className="contact-admin-card panel" key={c.id}>
+            <div className="contact-admin-head">
+              <div>
+                <b>{c.fullName}</b>
+                <small>
+                  {c.phone} · {new Date(c.createdAt).toLocaleString()}
+                </small>
+              </div>
+              <span className={"status " + c.status.toLowerCase()}>
+                {c.status}
+              </span>
+            </div>
+
+            <p>{c.message}</p>
+
+            <div className="row-actions">
+              {c.status !== "IN_PROGRESS" && c.status !== "RESOLVED" && (
+                <button onClick={() => update(c.id, "IN_PROGRESS")}>
+                  <Clock3 size={14} /> In progress
+                </button>
+              )}
+              {c.status !== "RESOLVED" && (
+                <button onClick={() => update(c.id, "RESOLVED")}>
+                  <Check size={14} /> Resolve
+                </button>
+              )}
+            </div>
+          </article>
+        ))}
+
+        {!list.length && <div className="empty">No customer messages found.</div>}
+      </div>
+    </main>
+  );
+}
