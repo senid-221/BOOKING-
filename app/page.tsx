@@ -1,10 +1,81 @@
 "use client";
-import {useState} from "react";import {ArrowRight,CalendarDays,Car,ChevronRight,Clock3,Coffee,Dumbbell,Gift,HeartHandshake,Hotel,MapPin,Menu,Music2,Scissors,Search,ShoppingBag,Sparkles,Utensils,Wrench,X,Users} from "lucide-react";
-const services=[["Food Ordering","Tegura ibiryo ubone delivery byoroshye.",Utensils],["Drinks Ordering","Tegeka ibinyobwa ukunda.",Coffee],["Beauty Services","Shaka beauty service kandi uyibuke.",Sparkles],["Room Booking","Book room yawe mbere y'urugendo.",Hotel],["Salon Booking","Hitamo salon n'isaha ikubereye.",Scissors],["Physiotherapy","Book gahunda ya physiotherapy.",Dumbbell],["Studio Recording","Shaka studio yo gufatiramo umuziki.",Music2],["Transport / Tickets","Tegura transport cyangwa ticket.",Car],["Shopping","Shaka ibyo ukeneye ubitegeke.",ShoppingBag],["Installation","Book service yo gushyiramo cyangwa gusana.",Wrench]];
-export default function Home(){const[open,setOpen]=useState(false);return <main>
-<nav className="nav"><div className="navin"><a className="brand" href="#"><span className="mark"><CalendarDays size={19}/></span><b>BOOKING</b></a><div className="links"><a href="#services">Services</a><a href="#how">How it works</a><a href="/track">Track Booking</a><a href="/providers/list">Providers</a><a href="/contact">Contact</a><a href="/donation">Donation</a></div><a className="login" href="/providers/login">Provider Login</a><button className="menu" onClick={()=>setOpen(!open)}>{open?<X size={22}/>:<Menu size={22}/>}</button></div>{open&&<div className="mobile"><a href="#services">Services</a><a href="#how">How it works</a><a href="/track">Track Booking</a><a href="/donation">Donation</a><a href="/providers/login">Provider Login</a></div>}</nav>
-<section className="hero"><div><div className="eyebrow"><i/> SERVICE BOOKING PLATFORM</div><h1>Murakaza neza.<br/><span>Book services</span> byoroshye.</h1><p>Shaka serivisi ukeneye, uhitemo igihe n'aho uyishakira, hanyuma wemeze booking yawe mu buryo bworoshye.</p><div className="actions"><a className="primary" href="#services">Tangira Booking <ArrowRight size={18}/></a><a className="secondary" href="/track"><Search size={17}/> Track Booking</a></div><div className="meta"><span><Clock3 size={16}/> Booking mu minota mike</span><span><MapPin size={16}/> Services aho uri</span></div></div><div className="quick"><div className="qtop"><div><small>QUICK BOOKING</small><h2>Shaka service</h2></div><span className="qicon"><CalendarDays size={20}/></span></div><div className="qrow"><span><MapPin size={17}/> Kigali</span><ChevronRight size={18}/></div><div className="qgrid"><div><small>Service</small><strong>Choose service</strong></div><div><small>Date</small><strong>Choose date</strong></div></div><a className="primary full" href="#services">Browse Services <ArrowRight size={17}/></a></div></section>
-<section id="services" className="section"><div className="heading"><div><small>BOOKING SERVICES</small><h2>Hitamo serivisi ukeneye</h2></div><a href="/services" className="view">View all <ArrowRight size={16}/></a></div><div className="grid">{services.map(([title,desc,Icon])=><a className="card" href={"/booking?service="+encodeURIComponent(title as string)} key={title as string}><span className="sicon"><Icon size={22}/></span><div className="ct"><h3>{title as string}</h3><p>{desc as string}</p><span className="book">Book now <ArrowRight size={15}/></span></div></a>)}</div></section>
-<section id="how" className="section"><div className="center"><small>HOW IT WORKS</small><h2>Booking yawe mu ntambwe 3</h2></div><div className="steps"><div><b>01</b><Gift/><h3>Hitamo service</h3><p>Shaka service ijyanye n'icyo ukeneye.</p></div><div><b>02</b><CalendarDays/><h3>Hitamo igihe</h3><p>Shyiramo date, time n'ahantu bikenewe.</p></div><div><b>03</b><HeartHandshake/><h3>Confirm</h3><p>Emeza booking yawe ubone confirmation.</p></div></div></section>
-<section id="donation" className="donation"><div><small>DONATION</small><h2>Hitamo ubufasha bwawe.</h2><p>Shyigikira BOOKING ukoresheje MTN MoMo kugira ngo system ikomeze gutera imbere.</p></div><a className="primary" href="/donation">Tanga ubufasha <ArrowRight size={18}/></a></section>
-<footer><span>© 2026 BOOKING</span><span>Service booking platform</span></footer></main>}
+
+import { ArrowLeft, ArrowRight, CalendarDays, HeartHandshake, Users } from "lucide-react";
+import { useRouter } from "next/navigation";
+
+export default function Home() {
+  const router = useRouter();
+
+  return (
+    <main className="welcome-shell">
+      <section className="welcome-screen">
+        <div className="welcome-brand">
+          <span className="welcome-mark">
+            <CalendarDays size={22} />
+          </span>
+          <span>BOOKING</span>
+        </div>
+
+        <div className="welcome-content">
+          <small className="welcome-eyebrow">SERVICE BOOKING PLATFORM</small>
+          <h1>
+            Welcome to
+            <br />
+            <span>BOOKING</span>
+          </h1>
+          <p>
+            Shaka service, hitamo igihe n&apos;aho uyishakira, hanyuma ukomeze
+            intambwe ku yindi.
+          </p>
+
+          <div className="welcome-actions">
+            <button
+              className="welcome-primary"
+              onClick={() => router.push("/services")}
+            >
+              Start Booking <ArrowRight size={18} />
+            </button>
+
+            <button
+              className="welcome-secondary"
+              onClick={() => router.push("/providers")}
+            >
+              <Users size={17} /> Provider Signup
+            </button>
+
+            <button
+              className="welcome-secondary"
+              onClick={() => router.push("/donation")}
+            >
+              <HeartHandshake size={17} /> Donation
+            </button>
+          </div>
+        </div>
+
+        <div className="welcome-footer">
+          <button
+            className="flow-back"
+            onClick={() => router.back()}
+            type="button"
+          >
+            <ArrowLeft size={17} /> Back
+          </button>
+
+          <div className="flow-dots">
+            <span className="active" />
+            <span />
+            <span />
+          </div>
+
+          <button
+            className="flow-next"
+            onClick={() => router.push("/services")}
+            type="button"
+          >
+            Next <ArrowRight size={17} />
+          </button>
+        </div>
+      </section>
+    </main>
+  );
+}
