@@ -1,0 +1,2 @@
+import {NextResponse} from "next/server";import {cookies} from "next/headers";import {cookieName} from "@/lib/admin-auth";
+export async function POST(){const jar=await cookies();jar.delete(cookieName);return NextResponse.json({ok:true})}
