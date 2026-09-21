@@ -1,0 +1,2 @@
+import {NextResponse} from "next/server";import {cookies} from "next/headers";import {PrismaClient} from "@prisma/client";import {getProviderId,providerCookieName} from "@/lib/provider-auth";const prisma=new PrismaClient();
+export async function POST(){const c=await cookies();const providerId=getProviderId(c.get(providerCookieName)?.value);if(!providerId)return NextResponse.json({error:"Unauthorized"},{status:401});await prisma.notificationRecipient.updateMany({where:{providerId,read:false},data:{read:true}});return NextResponse.json({ok:true})}
