@@ -1,13 +1,2 @@
-import {NextResponse} from "next/server";
-import {PrismaClient} from "@prisma/client";
-const prisma=new PrismaClient();
-export async function POST(req:Request){
-  try{
-    const {fullName,phone,serviceName}=await req.json();
-    if(!fullName||!phone||!serviceName)return NextResponse.json({error:"Missing required fields"},{status:400});
-    const service=await prisma.service.findUnique({where:{name:serviceName}});
-    if(!service)return NextResponse.json({error:"Service not found"},{status:404});
-    const provider=await prisma.provider.create({data:{fullName,phone,serviceId:service.id,status:"BLOCKED"}});
-    return NextResponse.json({providerId:provider.id,status:provider.status});
-  }catch(e){console.error(e);return NextResponse.json({error:"Could not create provider account"},{status:500})}
-}
+import {NextResponse} from "next/server";import {PrismaClient} from "@prisma/client";import crypto from "crypto";const prisma=new PrismaClient();const hash=(v:string)=>crypto.createHash("sha256").update(v).digest("hex");
+export async function POST(req:Request){try{const{fullName,phone,password,serviceName}=await req.json();if(!fullName||!phone||!password||!serviceName)return NextResponse.json({error:"All fields are required"},{status:400});if(String(password).length<6)return NextResponse.json({error:"Password must be at least 6 characters"},{status:400});const service=await prisma.service.findUnique({where:{name:serviceName}});if(!service)return NextResponse.json({error:"Service not found"},{status:404});const existing=await prisma.provider.findFirst({where:{phone}});if(existing)return NextResponse.json({error:"A provider account already uses this phone number."},{status:409});const provider=await prisma.provider.create({data:{fullName,phone,passwordHash:hash(password),serviceId:service.id,status:"BLOCKED"}});return NextResponse.json({providerId:provider.id,status:provider.status});}catch(e){console.error(e);return NextResponse.json({error:"Could not create provider account"},{status:500})}}
