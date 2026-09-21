@@ -41,17 +41,28 @@ export default function ProviderHome() {
   const [msg, setMsg] = useState("");
 
   useEffect(() => {
-    fetch("/api/provider/me", { cache: "no-store" })
-      .then(async (r) => {
+    async function load() {
+      try {
+        const r = await fetch("/api/provider/me", { cache: "no-store" });
+
         if (r.status === 401 || r.status === 403) {
           router.replace("/providers/login");
           return;
         }
-        if (!r.ok) throw new Error("Unable to load account");
+
+        if (!r.ok) {
+          throw new Error("Unable to load account");
+        }
+
         setData(await r.json());
-      })
-      .catch((e) => setMsg(e.message))
-      .finally(() => setLoading(false));
+      } catch (error) {
+        setMsg(error instanceof Error ? error.message : "Unable to load account");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    load();
   }, [router]);
 
   async function logout() {
@@ -82,26 +93,29 @@ export default function ProviderHome() {
         <div className="provider-head-actions">
           <button
             className="secondary"
-            onClick={() => router.push("/provider/notifications")}
             type="button"
+            onClick={() => router.push("/provider/notifications")}
           >
             <Bell size={16} /> Notifications
           </button>
+
           <button
             className="secondary"
-            onClick={() => router.push("/provider/bookings")}
             type="button"
+            onClick={() => router.push("/provider/bookings")}
           >
             <CalendarDays size={16} /> Bookings
           </button>
+
           <button
             className="secondary"
-            onClick={() => router.push("/provider/subscription")}
             type="button"
+            onClick={() => router.push("/provider/subscription")}
           >
             <Wallet size={16} /> Subscription
           </button>
-          <button className="logout light" onClick={logout} type="button">
+
+          <button className="logout light" type="button" onClick={logout}>
             <LogOut size={16} /> Logout
           </button>
         </div>
@@ -113,13 +127,15 @@ export default function ProviderHome() {
         <div>
           <CheckCircle2 />
           <span>Account</span>
-          <b>{data?.provider.status}</b>
+          <b>{data?.provider.status ?? "—"}</b>
         </div>
+
         <div>
           <CalendarDays />
           <span>Bookings</span>
-          <b>{data?.bookings.length}</b>
+          <b>{data?.bookings.length ?? 0}</b>
         </div>
+
         <div>
           <Clock3 />
           <span>Subscription</span>
@@ -139,13 +155,16 @@ export default function ProviderHome() {
           </div>
         </div>
 
-        {data?.bookings.length ? (
+        {data?.bookings?.length ? (
           data.bookings.slice(0, 5).map((b) => (
             <div className="provider-booking" key={b.id}>
               <div>
                 <b>{b.customerName}</b>
-                <span><Phone size={13} /> {b.phone}</span>
+                <span>
+                  <Phone size={13} /> {b.phone}
+                </span>
               </div>
+
               <div>
                 <span>
                   <CalendarDays size={13} /> {b.date || "—"} {b.time || ""}
@@ -154,6 +173,7 @@ export default function ProviderHome() {
                   <MapPin size={13} /> {b.location || "—"}
                 </span>
               </div>
+
               <span className={"status " + b.status.toLowerCase()}>
                 {b.status}
               </span>
