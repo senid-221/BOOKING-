@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, Search, Users } from "lucide-react";
 
-type S = {
+type ServiceSummary = {
   id: string;
   name: string;
   monthlyFee: number;
@@ -12,7 +12,7 @@ type S = {
   active: number;
 };
 
-type P = {
+type ProviderSummary = {
   id: string;
   fullName: string;
   phone: string;
@@ -20,41 +20,56 @@ type P = {
 };
 
 export default function ProviderDirectory() {
-  const [services, setServices] = useState<S[]>([]);
-  const [providers, setProviders] = useState<P[]>([]);
+  const [services, setServices] = useState<ServiceSummary[]>([]);
+  const [providers, setProviders] = useState<ProviderSummary[]>([]);
   const [selected, setSelected] = useState("");
-  const [q, setQ] = useState("");
+  const [query, setQuery] = useState("");
 
   useEffect(() => {
+    let active = true;
+
     async function load() {
       try {
-        const response = await fetch("/api/public/providers");
+        const response = await fetch("/api/public/providers", { cache: "no-store" });
         if (!response.ok) return;
 
         const result = await response.json();
-        setServices(result.services ?? []);
-        setProviders(result.providers ?? []);
+
+        if (active) {
+          setServices(result?.services ?? []);
+          setProviders(result?.providers ?? []);
+        }
       } catch {
-        setServices([]);
-        setProviders([]);
+        if (active) {
+          setServices([]);
+          setProviders([]);
+        }
       }
     }
 
     load();
+
+    return () => {
+      active = false;
+    };
   }, []);
 
-  const list = useMemo(() => {
-    const query = q.toLowerCase();
+  const filteredProviders = useMemo(() => {
+    const normalizedQuery = query.trim().toLowerCase();
 
-    return providers.filter((p) => {
-      const serviceMatch = !selected || p.service === selected;
-      const textMatch = (p.fullName + " " + p.service)
-        .toLowerCase()
-        .includes(query);
+    return providers.filter((provider) => {
+      const matchesService = !selected || provider.service === selected;
+      const searchable = (
+        provider.fullName +
+        " " +
+        provider.service +
+        " " +
+        provider.phone
+      ).toLowerCase();
 
-      return serviceMatch && textMatch;
+      return matchesService && searchable.includes(normalizedQuery);
     });
-  }, [providers, selected, q]);
+  }, [providers, selected, query]);
 
   return (
     <main className="public-page">
@@ -71,15 +86,15 @@ export default function ProviderDirectory() {
           <div className="admin-search">
             <Search size={17} />
             <input
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
               placeholder="Search provider or service..."
             />
           </div>
 
           <select
             value={selected}
-            onChange={(e) => setSelected(e.target.value)}
+            onChange={(event) => setSelected(event.target.value)}
           >
             <option value="">All services</option>
             {services.map((service) => (
@@ -92,8 +107,8 @@ export default function ProviderDirectory() {
       </div>
 
       <div className="directory-grid">
-        {list.length > 0 ? (
-          list.map((provider) => (
+        {filteredProviders.length > 0 ? (
+          filteredProviders.map((provider) => (
             <article className="provider-public-card" key={provider.id}>
               <span className="public-provider-icon">
                 <Users size={21} />
@@ -105,10 +120,7 @@ export default function ProviderDirectory() {
 
               <Link
                 className="primary full"
-                href={
-                  "/booking?service=" +
-                  encodeURIComponent(provider.service)
-                }
+                href={"/booking?service=" + encodeURIComponent(provider.service)}
               >
                 Book service <ArrowRight size={16} />
               </Link>
