@@ -1,0 +1,1 @@
+import {NextResponse} from "next/server";import {cookies} from "next/headers";import {providerCookieName} from "@/lib/provider-auth";export async function POST(){const c=await cookies();c.delete(providerCookieName);return NextResponse.json({ok:true})}
