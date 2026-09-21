@@ -51,7 +51,7 @@ export default function Settings() {
         <div>
           <small>ADMIN SECURITY</small>
           <h1>Settings</h1>
-          <p>Admin credentials and security configuration.</p>
+          
         </div>
       </div>
 
@@ -93,10 +93,10 @@ export default function Settings() {
             Do not commit passwords or API keys to GitHub.
           </p>
           {loading ? (
-            <small>Checking configuration...</small>
+            
           ) : (
             <small>
-              Session secret: {secret === "Configured" ? "Configured" : "Protected by environment"}
+              
             </small>
           )}
         </aside>
