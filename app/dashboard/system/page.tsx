@@ -30,7 +30,7 @@ export default function System() {
         <div>
           <small>SYSTEM HEALTH</small>
           <h1>System</h1>
-          <p>Production readiness and service configuration.</p>
+          
         </div>
       </div>
 
@@ -70,7 +70,7 @@ export default function System() {
       </div>
 
       <div className="panel system-note">
-        <h2>Production checklist</h2>
+        
         <p>
           Run database migrations before deployment, configure secrets in hosting,
           verify MTN MoMo sandbox first, then switch to production credentials only
