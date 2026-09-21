@@ -1,2 +1,66 @@
-"use client";import {useSearchParams} from "next/navigation";import Link from "next/link";import {CheckCircle2,Home,CalendarCheck2} from "lucide-react";
-export default function BookingSuccess(){const p=useSearchParams();const id=p.get("id");return <main className="result-page page"><div className="result-card"><div className="result-icon success"><CheckCircle2 size={34}/></div><small>BOOKING CONFIRMED</small><h1>Booking yawe yakiriwe.</h1><p>Booking request yawe yabitswe muri system. Admin azayigenzura kandi provider azahabwa booking iyo assignment ibaye.</p>{id&&<div className="reference"><span>Booking reference</span><code>{id}</code></div>}<div className="result-actions"><Link className="primary" href="/"><Home size={16}/> Home</Link><Link className="secondary" href="/services"><CalendarCheck2 size={16}/> Book another</Link></div></div></main>}
+"use client";
+
+import { Suspense } from "react";
+import { useSearchParams } from "next/navigation";
+import Link from "next/link";
+import { CheckCircle2, Home, CalendarCheck2 } from "lucide-react";
+
+function BookingSuccessContent() {
+  const p = useSearchParams();
+  const id = p.get("id");
+
+  return (
+    <main className="result-page page">
+      <div className="result-card">
+        <div className="result-icon success">
+          <CheckCircle2 size={34} />
+        </div>
+
+        <small>BOOKING CONFIRMED</small>
+
+        <h1>Booking yawe yakiriwe.</h1>
+
+        <p>
+          Booking request yawe yabitswe muri system. Admin azayigenzura kandi
+          provider azahabwa booking iyo assignment ibaye.
+        </p>
+
+        {id && (
+          <div className="reference">
+            <span>Booking reference</span>
+            <code>{id}</code>
+          </div>
+        )}
+
+        <div className="result-actions">
+          <Link className="primary" href="/">
+            <Home size={16} /> Home
+          </Link>
+          <Link className="secondary" href="/services">
+            <CalendarCheck2 size={16} /> Book another
+          </Link>
+        </div>
+      </div>
+    </main>
+  );
+}
+
+export default function BookingSuccess() {
+  return (
+    <Suspense
+      fallback={
+        <main className="result-page page">
+          <div className="result-card">
+            <div className="result-icon success">
+              <CheckCircle2 size={34} />
+            </div>
+            <small>BOOKING CONFIRMED</small>
+            <h1>Loading...</h1>
+          </div>
+        </main>
+      }
+    >
+      <BookingSuccessContent />
+    </Suspense>
+  );
+}
