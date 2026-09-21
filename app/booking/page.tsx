@@ -1,3 +1,113 @@
 "use client";
-import {useSearchParams} from "next/navigation";import Link from "next/link";import {ArrowLeft,ArrowRight,CalendarDays,MapPin} from "lucide-react";import {useState} from "react";
-export default function Booking(){const p=useSearchParams();const service=p.get("service")||"Choose a service";const[date,setDate]=useState("");const[time,setTime]=useState("");const[location,setLocation]=useState("");return <main className="page"><Link href="/services" className="back"><ArrowLeft size={17}/> Back to services</Link><div className="booking-layout"><section><small>NEW BOOKING</small><h1>{service}</h1><p className="lead">Hitamo igihe n'aho uzahererwa service, hanyuma ukomeze kuri checkout.</p><div className="form-card"><label>Date<input required type="date" value={date} onChange={e=>setDate(e.target.value)}/></label><label>Time<input required type="time" value={time} onChange={e=>setTime(e.target.value)}/></label><label>Location<div className="input-icon"><MapPin size={17}/><input required value={location} onChange={e=>setLocation(e.target.value)} placeholder="Kigali, Rwanda"/></div></label><Link className="primary full" href={"/checkout?service="+encodeURIComponent(service)+"&date="+encodeURIComponent(date)+"&time="+encodeURIComponent(time)}>Continue to checkout <ArrowRight size={17}/></Link></div></section><aside className="booking-summary"><div className="summary-icon"><CalendarDays size={24}/></div><small>BOOKING SUMMARY</small><h2>{service}</h2><p>Customer details tuzazinjiza kuri checkout.</p><p><b>Date:</b> {date||"—"}</p><p><b>Time:</b> {time||"—"}</p><p><b>Location:</b> {location||"—"}</p></aside></div></main>}
+
+import { Suspense, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import Link from "next/link";
+import {
+  ArrowLeft,
+  ArrowRight,
+  CalendarDays,
+  MapPin,
+} from "lucide-react";
+
+function BookingForm() {
+  const p = useSearchParams();
+  const service = p.get("service") || "Choose a service";
+  const [date, setDate] = useState("");
+  const [time, setTime] = useState("");
+  const [location, setLocation] = useState("");
+
+  return (
+    <main className="page">
+      <Link href="/services" className="back">
+        <ArrowLeft size={17} /> Back to services
+      </Link>
+
+      <div className="booking-layout">
+        <section>
+          <small>NEW BOOKING</small>
+          <h1>{service}</h1>
+          <p className="lead">
+            Hitamo igihe n'aho uzahererwa service, hanyuma ukomeze kuri
+            checkout.
+          </p>
+
+          <div className="form-card">
+            <label>
+              Date
+              <input
+                required
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+              />
+            </label>
+
+            <label>
+              Time
+              <input
+                required
+                type="time"
+                value={time}
+                onChange={(e) => setTime(e.target.value)}
+              />
+            </label>
+
+            <label>
+              Location
+              <div className="input-icon">
+                <MapPin size={17} />
+                <input
+                  required
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
+                  placeholder="Kigali, Rwanda"
+                />
+              </div>
+            </label>
+
+            <Link
+              className="primary full"
+              href={
+                "/checkout?service=" +
+                encodeURIComponent(service) +
+                "&date=" +
+                encodeURIComponent(date) +
+                "&time=" +
+                encodeURIComponent(time)
+              }
+            >
+              Continue to checkout <ArrowRight size={17} />
+            </Link>
+          </div>
+        </section>
+
+        <aside className="booking-summary">
+          <div className="summary-icon">
+            <CalendarDays size={24} />
+          </div>
+          <small>BOOKING SUMMARY</small>
+          <h2>{service}</h2>
+          <p>Customer details tuzazinjiza kuri checkout.</p>
+          <p>
+            <b>Date:</b> {date || "—"}
+          </p>
+          <p>
+            <b>Time:</b> {time || "—"}
+          </p>
+          <p>
+            <b>Location:</b> {location || "—"}
+          </p>
+        </aside>
+      </div>
+    </main>
+  );
+}
+
+export default function Booking() {
+  return (
+    <Suspense fallback={<main className="page"><div className="loading">Loading booking...</div></main>}>
+      <BookingForm />
+    </Suspense>
+  );
+}
