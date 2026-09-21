@@ -1,0 +1,2 @@
+import {NextResponse} from "next/server";import {PrismaClient} from "@prisma/client";const prisma=new PrismaClient();
+export async function GET(req:Request,{params}:{params:Promise<{id:string}>}){const{id}=await params;const d=await prisma.donation.findUnique({where:{id}});if(!d)return NextResponse.json({error:"Donation not found"},{status:404});return NextResponse.json({id:d.id,status:d.status,amount:d.amount,reference:d.reference,createdAt:d.createdAt,paidAt:d.paidAt})}
