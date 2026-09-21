@@ -1,4 +1,107 @@
 "use client";
-import {useEffect,useState} from "react";import Link from "next/link";import {ArrowLeft,CheckCircle2,Clock3,HeartHandshake,XCircle} from "lucide-react";
-type Donation={id:string;amount:number;phone:string;name:string|null;method:string;reference:string|null;status:string;createdAt:string;paidAt:string|null};
-export default function Donations(){const[data,setData]=useState<Donation[]>([]);useEffect(()=>{fetch("/api/admin/donations",{cache:"no-store"}).then(r=>r.ok?r.json():[]).then(setData)},[]);const money=(n:number)=>new Intl.NumberFormat("en-RW",{style:"currency",currency:"RWF",maximumFractionDigits:0}).format(n);return <main className="admin-page"><Link href="/dashboard" className="back"><ArrowLeft size={17}/> Dashboard</Link><div className="admin-page-head"><div><small>DONATIONS</small><h1>Donations</h1><p>MTN MoMo contributions supporting BOOKING.</p></div></div><div className="panel donation-admin-summary"><span><HeartHandshake size={20}/></span><div><small>Total successful donations</small><strong>{money(data.filter(d=>d.status==="SUCCESS").reduce((a,d)=>a+d.amount,0))}</strong></div></div><div className="panel admin-table"><div className="table-wrap"><table><thead><tr><th>Donor</th><th>Phone</th><th>Amount</th><th>Reference</th><th>Status</th><th>Date</th></tr></thead><tbody>{data.map(d=><tr key={d.id}><td>{d.name||"Anonymous"}</td><td>{d.phone}</td><td><b>{money(d.amount)}</b></td><td><code>{d.reference||"—"}</code></td><td>{d.status==="SUCCESS"?<span className="status active"><CheckCircle2 size={12}/> SUCCESS</span>:d.status==="FAILED"?<span className="status suspended"><XCircle size={12}/> FAILED</span>:<span className="status pending"><Clock3 size={12}/> PENDING</span>}</td><td>{new Date(d.paidAt||d.createdAt).toLocaleString()}</td></tr>)}</tbody></table></div></div></main>
+
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import {
+  ArrowLeft,
+  CheckCircle2,
+  Clock3,
+  HeartHandshake,
+  XCircle,
+} from "lucide-react";
+
+type Donation = {
+  id: string;
+  amount: number;
+  phone: string;
+  name: string | null;
+  method: string;
+  reference: string | null;
+  status: string;
+  createdAt: string;
+  paidAt: string | null;
+};
+
+export default function Donations() {
+  const [data, setData] = useState<Donation[]>([]);
+
+  useEffect(() => {
+    fetch("/api/admin/donations", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : []))
+      .then(setData);
+  }, []);
+
+  const money = (n: number) =>
+    new Intl.NumberFormat("en-RW", {
+      style: "currency",
+      currency: "RWF",
+      maximumFractionDigits: 0,
+    }).format(n);
+
+  return (
+    <main className="admin-page">
+      <Link href="/dashboard" className="back">
+        <ArrowLeft size={17} /> Dashboard
+      </Link>
+
+      <div className="admin-page-head">
+        <div>
+          <small>DONATIONS</small>
+          <h1>Donations</h1>
+          <p>MTN MoMo contributions supporting BOOKING.</p>
+        </div>
+      </div>
+
+      <div className="panel donation-admin-summary">
+        <span><HeartHandshake size={20} /></span>
+        <div>
+          <small>Total successful donations</small>
+          <strong>
+            {money(
+              data
+                .filter((d) => d.status === "SUCCESS")
+                .reduce((a, d) => a + d.amount, 0)
+            )}
+          </strong>
+        </div>
+      </div>
+
+      <div className="panel admin-table">
+        <div className="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Donor</th>
+                <th>Phone</th>
+                <th>Amount</th>
+                <th>Reference</th>
+                <th>Status</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.map((d) => (
+                <tr key={d.id}>
+                  <td>{d.name || "Anonymous"}</td>
+                  <td>{d.phone}</td>
+                  <td><b>{money(d.amount)}</b></td>
+                  <td><code>{d.reference || "—"}</code></td>
+                  <td>
+                    {d.status === "SUCCESS" ? (
+                      <span className="status active"><CheckCircle2 size={12} /> SUCCESS</span>
+                    ) : d.status === "FAILED" ? (
+                      <span className="status suspended"><XCircle size={12} /> FAILED</span>
+                    ) : (
+                      <span className="status pending"><Clock3 size={12} /> PENDING</span>
+                    )}
+                  </td>
+                  <td>{new Date(d.paidAt || d.createdAt).toLocaleString()}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  );
+}
