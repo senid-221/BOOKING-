@@ -26,27 +26,35 @@ export default function ProviderDirectory() {
   const [q, setQ] = useState("");
 
   useEffect(() => {
-    fetch("/api/public/providers")
-      .then((r) => (r.ok ? r.json() : null))
-      .then((d) => {
-        if (d) {
-          setServices(d.services);
-          setProviders(d.providers);
-        }
-      });
+    async function load() {
+      try {
+        const response = await fetch("/api/public/providers");
+        if (!response.ok) return;
+
+        const result = await response.json();
+        setServices(result.services ?? []);
+        setProviders(result.providers ?? []);
+      } catch {
+        setServices([]);
+        setProviders([]);
+      }
+    }
+
+    load();
   }, []);
 
-  const list = useMemo(
-    () =>
-      providers.filter(
-        (p) =>
-          (!selected || p.service === selected) &&
-          (p.fullName + " " + p.service)
-            .toLowerCase()
-            .includes(q.toLowerCase())
-      ),
-    [providers, selected, q]
-  );
+  const list = useMemo(() => {
+    const query = q.toLowerCase();
+
+    return providers.filter((p) => {
+      const serviceMatch = !selected || p.service === selected;
+      const textMatch = (p.fullName + " " + p.service)
+        .toLowerCase()
+        .includes(query);
+
+      return serviceMatch && textMatch;
+    });
+  }, [providers, selected, q]);
 
   return (
     <main className="public-page">
@@ -69,11 +77,14 @@ export default function ProviderDirectory() {
             />
           </div>
 
-          <select value={selected} onChange={(e) => setSelected(e.target.value)}>
+          <select
+            value={selected}
+            onChange={(e) => setSelected(e.target.value)}
+          >
             <option value="">All services</option>
-            {services.map((s) => (
-              <option key={s.id} value={s.name}>
-                {s.name}
+            {services.map((service) => (
+              <option key={service.id} value={service.name}>
+                {service.name}
               </option>
             ))}
           </select>
@@ -81,18 +92,23 @@ export default function ProviderDirectory() {
       </div>
 
       <div className="directory-grid">
-        {list.length ? (
-          list.map((p) => (
-            <article className="provider-public-card" key={p.id}>
+        {list.length > 0 ? (
+          list.map((provider) => (
+            <article className="provider-public-card" key={provider.id}>
               <span className="public-provider-icon">
                 <Users size={21} />
               </span>
-              <small>{p.service}</small>
-              <h2>{p.fullName}</h2>
+
+              <small>{provider.service}</small>
+              <h2>{provider.fullName}</h2>
               <p>ACTIVE provider</p>
+
               <Link
                 className="primary full"
-                href={"/booking?service=" + encodeURIComponent(p.service)}
+                href={
+                  "/booking?service=" +
+                  encodeURIComponent(provider.service)
+                }
               >
                 Book service <ArrowRight size={16} />
               </Link>
@@ -107,10 +123,13 @@ export default function ProviderDirectory() {
 
       <div className="service-capacity-public">
         <h3>Service availability</h3>
-        {services.map((s) => (
-          <div key={s.id}>
-            <span>{s.name}</span>
-            <b>{s.active}/{s.maxProviders}</b>
+
+        {services.map((service) => (
+          <div key={service.id}>
+            <span>{service.name}</span>
+            <b>
+              {service.active}/{service.maxProviders}
+            </b>
           </div>
         ))}
       </div>
