@@ -1,0 +1,5 @@
+"use client";
+import {useState} from "react";
+import Link from "next/link";
+import {ArrowLeft,ArrowRight,CalendarDays} from "lucide-react";
+export default function Login(){const[email,setEmail]=useState("");const[password,setPassword]=useState("");return <main className="auth"><div className="auth-card"><Link href="/" className="auth-brand"><span className="mark"><CalendarDays size={18}/></span>BOOKING</Link><div className="auth-copy"><small>WELCOME BACK</small><h1>Login</h1><p>Injira muri konti yawe ukomeze booking.</p></div><form onSubmit={e=>e.preventDefault()}><label>Email<input type="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="you@example.com"/></label><label>Password<input type="password" value={password} onChange={e=>setPassword(e.target.value)} placeholder="••••••••"/></label><button className="primary full">Login <ArrowRight size={17}/></button></form><Link href="/" className="back home-back"><ArrowLeft size={16}/> Back home</Link></div></main>}
