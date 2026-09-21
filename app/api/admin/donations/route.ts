@@ -1,0 +1,2 @@
+import {NextResponse} from "next/server";import {cookies} from "next/headers";import {PrismaClient} from "@prisma/client";import {cookieName,isValidAdminSession} from "@/lib/admin-auth";const prisma=new PrismaClient();
+export async function GET(){const c=await cookies();if(!isValidAdminSession(c.get(cookieName)?.value))return NextResponse.json({error:"Unauthorized"},{status:401});const rows=await prisma.donation.findMany({take:200,orderBy:{createdAt:"desc"}});return NextResponse.json(rows)}
