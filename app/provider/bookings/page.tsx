@@ -1,7 +1,131 @@
 "use client";
-import {useEffect,useState} from "react";import {useRouter} from "next/navigation";import Link from "next/link";import {ArrowLeft,CalendarDays,CheckCircle2,Clock3,MapPin,Phone,XCircle} from "lucide-react";
-type B={id:string;customerName:string;phone:string;date:string|null;time:string|null;location:string|null;status:string;service:string};
-export default function ProviderBookings(){const router=useRouter();const[data,setData]=useState<B[]>([]);const[message,setMessage]=useState("");const[busy,setBusy]=useState("");
-async function load(){const r=await fetch("/api/provider/bookings",{cache:"no-store"});if(r.status===401||r.status===403){router.replace("/providers/login");return}if(r.ok)setData(await r.json())}useEffect(()=>{load()},[router]);
-async function action(id:string,status:string){setBusy(id);setMessage("");const r=await fetch("/api/provider/bookings/"+id,{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({status})});const d=await r.json();if(!r.ok)setMessage(d.error||"Update failed");else setMessage("Booking updated.");setBusy("");load()}
-return <main className="provider-dashboard"><Link href="/provider" className="back"><ArrowLeft size={17}/> Provider dashboard</Link><header className="provider-notify-head"><div><small>YOUR BOOKINGS</small><h1>Bookings</h1><p>Genzura booking wahawe kandi uvugane n'abakiriya.</p></div></header>{message&&<div className="login-error">{message}</div>}<section className="provider-bookings">{data.length?data.map(b=><article className="provider-booking" key={b.id}><div><b>{b.customerName}</b><span><Phone size={13}/> {b.phone}</span><span><CalendarDays size={13}/> {b.date||"—"} {b.time||""}</span></div><div><span><MapPin size={13}/> {b.location||"—"}</span><span>Service: {b.service}</span></div><div><span className={"status "+b.status.toLowerCase()}>{b.status}</span><div className="provider-book-actions">{b.status==="CONFIRMED"&&<button disabled={busy===b.id} onClick={()=>action(b.id,"COMPLETED")}><CheckCircle2 size={14}/> Complete</button>}{b.status==="CONFIRMED"&&<button disabled={busy===b.id} onClick={()=>action(b.id,"CANCELLED")}><XCircle size={14}/> Cancel</button>}</div></div></article>):<div className="empty">Nta booking wahawe ubu.</div>}</section></main>
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import {
+  ArrowLeft,
+  CalendarDays,
+  CheckCircle2,
+  MapPin,
+  Phone,
+  XCircle,
+} from "lucide-react";
+
+type B = {
+  id: string;
+  customerName: string;
+  phone: string;
+  date: string | null;
+  time: string | null;
+  location: string | null;
+  status: string;
+  service: string;
+};
+
+export default function ProviderBookings() {
+  const router = useRouter();
+  const [data, setData] = useState<B[]>([]);
+  const [message, setMessage] = useState("");
+  const [busy, setBusy] = useState("");
+
+  async function load() {
+    const r = await fetch("/api/provider/bookings", { cache: "no-store" });
+    if (r.status === 401 || r.status === 403) {
+      router.replace("/providers/login");
+      return;
+    }
+    if (r.ok) setData(await r.json());
+  }
+
+  useEffect(() => {
+    load();
+  }, [router]);
+
+  async function action(id: string, status: string) {
+    setBusy(id);
+    setMessage("");
+
+    const r = await fetch("/api/provider/bookings/" + id, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status }),
+    });
+
+    const d = await r.json();
+    if (!r.ok) setMessage(d.error || "Update failed");
+    else setMessage("Booking updated.");
+
+    setBusy("");
+    load();
+  }
+
+  return (
+    <main className="provider-dashboard">
+      <Link href="/provider" className="back">
+        <ArrowLeft size={17} /> Provider dashboard
+      </Link>
+
+      <header className="provider-notify-head">
+        <div>
+          <small>YOUR BOOKINGS</small>
+          <h1>Bookings</h1>
+          <p>Genzura booking wahawe kandi uvugane n'abakiriya.</p>
+        </div>
+      </header>
+
+      {message && <div className="login-error">{message}</div>}
+
+      <section className="provider-bookings">
+        {data.length ? (
+          data.map((b) => (
+            <article className="provider-booking" key={b.id}>
+              <div>
+                <b>{b.customerName}</b>
+                <span><Phone size={13} /> {b.phone}</span>
+                <span>
+                  <CalendarDays size={13} /> {b.date || "—"} {b.time || ""}
+                </span>
+              </div>
+
+              <div>
+                <span><MapPin size={13} /> {b.location || "—"}</span>
+                <span>Service: {b.service}</span>
+              </div>
+
+              <div>
+                <span className={"status " + b.status.toLowerCase()}>
+                  {b.status}
+                </span>
+
+                <div className="provider-book-actions">
+                  {b.status === "CONFIRMED" && (
+                    <button
+                      disabled={busy === b.id}
+                      onClick={() => action(b.id, "COMPLETED")}
+                      type="button"
+                    >
+                      <CheckCircle2 size={14} /> Complete
+                    </button>
+                  )}
+
+                  {b.status === "CONFIRMED" && (
+                    <button
+                      disabled={busy === b.id}
+                      onClick={() => action(b.id, "CANCELLED")}
+                      type="button"
+                    >
+                      <XCircle size={14} /> Cancel
+                    </button>
+                  )}
+                </div>
+              </div>
+            </article>
+          ))
+        ) : (
+          <div className="empty">Nta booking wahawe ubu.</div>
+        )}
+      </section>
+    </main>
+  );
+}
