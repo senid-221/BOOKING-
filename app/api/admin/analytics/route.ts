@@ -1,2 +1,115 @@
-import {NextResponse} from "next/server";import {cookies} from "next/headers";import {PrismaClient} from "@prisma/client";import {cookieName,isValidAdminSession} from "@/lib/admin-auth";const prisma=new PrismaClient();
-export async function GET(){const c=await cookies();if(!isValidAdminSession(c.get(cookieName)?.value))return NextResponse.json({error:"Unauthorized"},{status:401});const[bTotal,bPending,bConfirmed,bCompleted,bCancelled,pTotal,pActive,pBlocked,pSuspended,pSuccess,pPending,pFailed,pRevenue,dSuccess,dPending,dFailed,dTotal,cNew,cProgress,cResolved,services,bookings,providers]=await Promise.all([prisma.booking.count(),prisma.booking.count({where:{status:"PENDING"}}),prisma.booking.count({where:{status:"CONFIRMED"}}),prisma.booking.count({where:{status:"COMPLETED"}}),prisma.booking.count({where:{status:"CANCELLED"}}),prisma.provider.count(),prisma.provider.count({where:{status:"ACTIVE"}}),prisma.provider.count({where:{status:"BLOCKED"}}),prisma.provider.count({where:{status:"SUSPENDED"}}),prisma.payment.count({where:{status:"SUCCESS"}}),prisma.payment.count({where:{status:"PENDING"}}),prisma.payment.count({where:{status:"FAILED"}}),prisma.payment.aggregate({where:{status:"SUCCESS"},_sum:{amount:true}}),prisma.donation.count({where:{status:"SUCCESS"}}),prisma.donation.count({where:{status:"PENDING"}}),prisma.donation.count({where:{status:"FAILED"}}),prisma.donation.aggregate({where:{status:"SUCCESS"},_sum:{amount:true}}),prisma.contactMessage.count({where:{status:"NEW"}}),prisma.contactMessage.count({where:{status:"IN_PROGRESS"}}),prisma.contactMessage.count({where:{status:"RESOLVED"}}),prisma.service.findMany({orderBy:{name:"asc"}}),prisma.booking.findMany({select:{serviceId:true}}),prisma.provider.findMany({select:{serviceId:true,status:true}})]);return NextResponse.json({bookings:{total:bTotal,pending:bPending,confirmed:bConfirmed,completed:bCompleted,cancelled:bCancelled},providers:{total:pTotal,active:pActive,blocked:pBlocked,suspended:pSuspended},payments:{successful:pSuccess,pending:pPending,failed:pFailed,revenue:pRevenue._sum.amount||0},donations:{successful:dSuccess,pending:dPending,failed:dFailed,total:dTotal._sum.amount||0},contacts:{new:cNew,inProgress:cProgress,resolved:cResolved},services:services.map(s=>({name:s.name,bookings:bookings.filter(b=>b.serviceId===s.id).length,activeProviders:providers.filter(p=>p.serviceId===s.id&&p.status==="ACTIVE").length,capacity:s.maxProviders}))})}
+import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
+import { PrismaClient, ProviderStatus } from "@prisma/client";
+import { cookieName, isValidAdminSession } from "@/lib/admin-auth";
+
+const prisma = new PrismaClient();
+
+export async function GET() {
+  const cookieStore = await cookies();
+
+  if (!isValidAdminSession(cookieStore.get(cookieName)?.value)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const [
+    bTotal,
+    bPending,
+    bConfirmed,
+    bCompleted,
+    bCancelled,
+    pTotal,
+    pActive,
+    pBlocked,
+    pSuspended,
+    pSuccess,
+    pPending,
+    pFailed,
+    pRevenue,
+    dSuccess,
+    dPending,
+    dFailed,
+    dTotal,
+    cNew,
+    cProgress,
+    cResolved,
+    services,
+    bookings,
+    providers,
+  ] = await Promise.all([
+    prisma.booking.count(),
+    prisma.booking.count({ where: { status: "PENDING" } }),
+    prisma.booking.count({ where: { status: "CONFIRMED" } }),
+    prisma.booking.count({ where: { status: "COMPLETED" } }),
+    prisma.booking.count({ where: { status: "CANCELLED" } }),
+    prisma.provider.count(),
+    prisma.provider.count({ where: { status: "ACTIVE" } }),
+    prisma.provider.count({ where: { status: "BLOCKED" } }),
+    prisma.provider.count({ where: { status: "SUSPENDED" } }),
+    prisma.payment.count({ where: { status: "SUCCESS" } }),
+    prisma.payment.count({ where: { status: "PENDING" } }),
+    prisma.payment.count({ where: { status: "FAILED" } }),
+    prisma.payment.aggregate({
+      where: { status: "SUCCESS" },
+      _sum: { amount: true },
+    }),
+    prisma.donation.count({ where: { status: "SUCCESS" } }),
+    prisma.donation.count({ where: { status: "PENDING" } }),
+    prisma.donation.count({ where: { status: "FAILED" } }),
+    prisma.donation.aggregate({
+      where: { status: "SUCCESS" },
+      _sum: { amount: true },
+    }),
+    prisma.contactMessage.count({ where: { status: "NEW" } }),
+    prisma.contactMessage.count({ where: { status: "IN_PROGRESS" } }),
+    prisma.contactMessage.count({ where: { status: "RESOLVED" } }),
+    prisma.service.findMany({ orderBy: { name: "asc" } }),
+    prisma.booking.findMany({ select: { serviceId: true } }),
+    prisma.provider.findMany({ select: { serviceId: true, status: true } }),
+  ]);
+
+  const serviceStats = services.map((service) => ({
+    name: service.name,
+    bookings: bookings.filter((booking) => booking.serviceId === service.id).length,
+    activeProviders: providers.filter(
+      (provider) =>
+        provider.serviceId === service.id &&
+        provider.status === ProviderStatus.ACTIVE
+    ).length,
+    capacity: service.maxProviders,
+  }));
+
+  return NextResponse.json({
+    bookings: {
+      total: bTotal,
+      pending: bPending,
+      confirmed: bConfirmed,
+      completed: bCompleted,
+      cancelled: bCancelled,
+    },
+    providers: {
+      total: pTotal,
+      active: pActive,
+      blocked: pBlocked,
+      suspended: pSuspended,
+    },
+    payments: {
+      successful: pSuccess,
+      pending: pPending,
+      failed: pFailed,
+      revenue: pRevenue._sum.amount ?? 0,
+    },
+    donations: {
+      successful: dSuccess,
+      pending: dPending,
+      failed: dFailed,
+      total: dTotal._sum.amount ?? 0,
+    },
+    contacts: {
+      new: cNew,
+      inProgress: cProgress,
+      resolved: cResolved,
+    },
+    services: serviceStats,
+  });
+}
