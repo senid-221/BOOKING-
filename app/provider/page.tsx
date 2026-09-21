@@ -23,7 +23,7 @@ type Data = {
     status: string;
     subscriptionEndsAt: string | null;
   };
-  bookings: {
+  bookings: Array<{
     id: string;
     customerName: string;
     phone: string;
@@ -31,7 +31,7 @@ type Data = {
     time: string | null;
     location: string | null;
     status: string;
-  }[];
+  }>;
 };
 
 export default function ProviderHome() {
@@ -41,28 +41,36 @@ export default function ProviderHome() {
   const [msg, setMsg] = useState("");
 
   useEffect(() => {
+    let active = true;
+
     async function load() {
       try {
-        const r = await fetch("/api/provider/me", { cache: "no-store" });
+        const response = await fetch("/api/provider/me", { cache: "no-store" });
 
-        if (r.status === 401 || r.status === 403) {
+        if (response.status === 401 || response.status === 403) {
           router.replace("/providers/login");
           return;
         }
 
-        if (!r.ok) {
+        if (!response.ok) {
           throw new Error("Unable to load account");
         }
 
-        setData(await r.json());
+        const result = (await response.json()) as Data;
+        if (active) setData(result);
       } catch (error) {
-        setMsg(error instanceof Error ? error.message : "Unable to load account");
+        if (active) {
+          setMsg(error instanceof Error ? error.message : "Unable to load account");
+        }
       } finally {
-        setLoading(false);
+        if (active) setLoading(false);
       }
     }
 
     load();
+    return () => {
+      active = false;
+    };
   }, [router]);
 
   async function logout() {
@@ -79,14 +87,22 @@ export default function ProviderHome() {
     );
   }
 
+  if (!data) {
+    return (
+      <main className="provider-dashboard">
+        <div className="login-error">{msg || "Unable to load provider account."}</div>
+      </main>
+    );
+  }
+
   return (
     <main className="provider-dashboard">
       <header className="provider-dash-head">
         <div>
           <small>PROVIDER PORTAL</small>
-          <h1>Murakaza neza, {data?.provider.fullName}</h1>
+          <h1>Murakaza neza, {data.provider.fullName}</h1>
           <p>
-            <UserRound size={15} /> {data?.provider.service}
+            <UserRound size={15} /> {data.provider.service}
           </p>
         </div>
 
@@ -127,20 +143,20 @@ export default function ProviderHome() {
         <div>
           <CheckCircle2 />
           <span>Account</span>
-          <b>{data?.provider.status ?? "—"}</b>
+          <b>{data.provider.status}</b>
         </div>
 
         <div>
           <CalendarDays />
           <span>Bookings</span>
-          <b>{data?.bookings.length ?? 0}</b>
+          <b>{data.bookings.length}</b>
         </div>
 
         <div>
           <Clock3 />
           <span>Subscription</span>
           <b>
-            {data?.provider.subscriptionEndsAt
+            {data.provider.subscriptionEndsAt
               ? new Date(data.provider.subscriptionEndsAt).toLocaleDateString()
               : "—"}
           </b>
@@ -155,27 +171,28 @@ export default function ProviderHome() {
           </div>
         </div>
 
-        {data?.bookings?.length ? (
-          data.bookings.slice(0, 5).map((b) => (
-            <div className="provider-booking" key={b.id}>
+        {data.bookings.length > 0 ? (
+          data.bookings.slice(0, 5).map((booking) => (
+            <div className="provider-booking" key={booking.id}>
               <div>
-                <b>{b.customerName}</b>
+                <b>{booking.customerName}</b>
                 <span>
-                  <Phone size={13} /> {b.phone}
+                  <Phone size={13} /> {booking.phone}
                 </span>
               </div>
 
               <div>
                 <span>
-                  <CalendarDays size={13} /> {b.date || "—"} {b.time || ""}
+                  <CalendarDays size={13} /> {booking.date || "—"}{" "}
+                  {booking.time || ""}
                 </span>
                 <span>
-                  <MapPin size={13} /> {b.location || "—"}
+                  <MapPin size={13} /> {booking.location || "—"}
                 </span>
               </div>
 
-              <span className={"status " + b.status.toLowerCase()}>
-                {b.status}
+              <span className={"status " + booking.status.toLowerCase()}>
+                {booking.status}
               </span>
             </div>
           ))
