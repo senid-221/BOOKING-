@@ -80,7 +80,7 @@ export default function ProviderDirectory() {
       <div className="directory-hero">
         <small>PROVIDER DIRECTORY</small>
         <h1>Shaka uwagufasha.</h1>
-        <p>Abatanga service bafite ACTIVE status gusa ni bo berekana hano.</p>
+        
 
         <div className="directory-tools">
           <div className="admin-search">
