@@ -5,6 +5,21 @@ import { cookieName, isValidAdminSession } from "@/lib/admin-auth";
 
 const prisma = new PrismaClient();
 
+type ServiceRow = {
+  id: string;
+  name: string;
+  maxProviders: number;
+};
+
+type BookingRow = {
+  serviceId: string;
+};
+
+type ProviderRow = {
+  serviceId: string;
+  status: string;
+};
+
 export async function GET() {
   const cookieStore = await cookies();
 
@@ -33,9 +48,9 @@ export async function GET() {
     cNew,
     cProgress,
     cResolved,
-    services,
-    bookings,
-    providers,
+    rawServices,
+    rawBookings,
+    rawProviders,
   ] = await Promise.all([
     prisma.booking.count(),
     prisma.booking.count({ where: { status: "PENDING" } }),
@@ -63,16 +78,29 @@ export async function GET() {
     prisma.contactMessage.count({ where: { status: "NEW" } }),
     prisma.contactMessage.count({ where: { status: "IN_PROGRESS" } }),
     prisma.contactMessage.count({ where: { status: "RESOLVED" } }),
-    prisma.service.findMany({ orderBy: { name: "asc" } }),
-    prisma.booking.findMany({ select: { serviceId: true } }),
-    prisma.provider.findMany({ select: { serviceId: true, status: true } }),
+    prisma.service.findMany({
+      orderBy: { name: "asc" },
+      select: { id: true, name: true, maxProviders: true },
+    }),
+    prisma.booking.findMany({
+      select: { serviceId: true },
+    }),
+    prisma.provider.findMany({
+      select: { serviceId: true, status: true },
+    }),
   ]);
 
-  const serviceStats = services.map((service) => ({
+  const services = rawServices as ServiceRow[];
+  const bookings = rawBookings as BookingRow[];
+  const providers = rawProviders as ProviderRow[];
+
+  const serviceStats = services.map((service: ServiceRow) => ({
     name: service.name,
-    bookings: bookings.filter((booking) => booking.serviceId === service.id).length,
+    bookings: bookings.filter(
+      (booking: BookingRow) => booking.serviceId === service.id
+    ).length,
     activeProviders: providers.filter(
-      (provider) =>
+      (provider: ProviderRow) =>
         provider.serviceId === service.id &&
         provider.status === "ACTIVE"
     ).length,
