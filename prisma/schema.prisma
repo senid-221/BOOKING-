@@ -7,6 +7,7 @@ model Booking { id String @id @default(cuid()); customerName String; phone Strin
 model Donation { id String @id @default(cuid()); amount Int; phone String; name String?; method DonationPaymentMethod; reference String?; status DonationStatus @default(PENDING); paidAt DateTime?; createdAt DateTime @default(now()) }
 model Notification { id String @id @default(cuid()); title String; message String; audience NotificationAudience; createdAt DateTime @default(now()); recipients NotificationRecipient[] }
 model NotificationRecipient { id String @id @default(cuid()); notificationId String; notification Notification @relation(fields:[notificationId],references:[id]); providerId String; provider Provider @relation(fields:[providerId],references:[id]); read Boolean @default(false); createdAt DateTime @default(now()); @@unique([notificationId,providerId]) }
+model ContactMessage { id String @id @default(cuid()); fullName String; phone String; message String; status ContactStatus @default(NEW); createdAt DateTime @default(now()) }
 enum ProviderStatus { BLOCKED PENDING ACTIVE SUSPENDED }
 enum PaymentMethod { MTN_MOMO }
 enum PaymentStatus { PENDING SUCCESS FAILED }
@@ -14,3 +15,4 @@ enum BookingStatus { PENDING CONFIRMED COMPLETED CANCELLED }
 enum DonationPaymentMethod { MTN_MOMO }
 enum DonationStatus { PENDING SUCCESS FAILED }
 enum NotificationAudience { ALL_PROVIDERS ACTIVE_PROVIDERS BLOCKED_PROVIDERS }
+enum ContactStatus { NEW IN_PROGRESS RESOLVED }
