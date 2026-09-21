@@ -1,41 +1,10 @@
 generator client { provider = "prisma-client-js" }
 datasource db { provider = "postgresql"; url = env("DATABASE_URL") }
-
-model Service {
-  id            String   @id @default(cuid())
-  name          String   @unique
-  description   String?
-  monthlyFee    Int      @default(25000)
-  maxProviders  Int      @default(5)
-  createdAt     DateTime @default(now())
-  providers     Provider[]
-}
-model Provider {
-  id            String   @id @default(cuid())
-  fullName      String
-  phone         String
-  email         String?
-  passwordHash  String?
-  status        ProviderStatus @default(BLOCKED)
-  serviceId     String
-  service      Service @relation(fields: [serviceId], references: [id])
-  subscriptionEndsAt DateTime?
-  payments      Payment[]
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  @@index([serviceId, status])
-}
-model Payment {
-  id            String   @id @default(cuid())
-  providerId    String
-  provider      Provider @relation(fields: [providerId], references: [id])
-  amount        Int
-  method        PaymentMethod
-  reference     String?
-  status        PaymentStatus @default(PENDING)
-  paidAt        DateTime?
-  createdAt     DateTime @default(now())
-}
+model Service { id String @id @default(cuid()); name String @unique; description String?; monthlyFee Int @default(25000); maxProviders Int @default(5); createdAt DateTime @default(now()); providers Provider[]; bookings Booking[] }
+model Provider { id String @id @default(cuid()); fullName String; phone String; email String?; passwordHash String?; status ProviderStatus @default(BLOCKED); serviceId String; service Service @relation(fields:[serviceId],references:[id]); subscriptionEndsAt DateTime?; payments Payment[]; bookings Booking[]; createdAt DateTime @default(now()); updatedAt DateTime @updatedAt; @@index([serviceId,status]) }
+model Payment { id String @id @default(cuid()); providerId String; provider Provider @relation(fields:[providerId],references:[id]); amount Int; method PaymentMethod; reference String?; status PaymentStatus @default(PENDING); paidAt DateTime?; createdAt DateTime @default(now()) }
+model Booking { id String @id @default(cuid()); customerName String; phone String; serviceId String; service Service @relation(fields:[serviceId],references:[id]); providerId String?; provider Provider? @relation(fields:[providerId],references:[id]); date String?; time String?; location String?; note String?; status BookingStatus @default(PENDING); createdAt DateTime @default(now()); updatedAt DateTime @updatedAt; @@index([serviceId,status]) }
 enum ProviderStatus { BLOCKED PENDING ACTIVE SUSPENDED }
 enum PaymentMethod { MTN_MOMO }
 enum PaymentStatus { PENDING SUCCESS FAILED }
+enum BookingStatus { PENDING CONFIRMED COMPLETED CANCELLED }
