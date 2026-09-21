@@ -9,12 +9,6 @@ export default function Home() {
   return (
     <main className="welcome-shell">
       <section className="welcome-screen">
-        <div className="welcome-brand">
-          <span className="welcome-mark">
-            <CalendarDays size={22} />
-          </span>
-          <span>BOOKING</span>
-        </div>
 
         <div className="welcome-content">
           
